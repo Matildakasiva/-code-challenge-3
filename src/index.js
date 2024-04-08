@@ -141,6 +141,5 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Error updating tickets:', error);
         });
     }
-
     
 });
