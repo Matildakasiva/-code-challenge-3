@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const buyTicketButton = document.getElementById('buy-ticket');
     buyTicketButton.addEventListener('click', () => {
-        const filmId = '1';
+        const filmId = '1'
         fetch('http://localhost:3000/tickets', {
             method: 'POST',
             headers: {
@@ -103,7 +103,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-
+document.getElementById('films').addEventListener('click', event => {
+        if (event.target.tagName === 'LI') {
+            const filmId = event.target.dataset.filmId
+            deleteFilm(filmId)
+        }
+    });
     function deleteFilm(filmId) {
         fetch(`http://localhost:3000/films/${filmId}`, {
             method: 'DELETE'
@@ -112,34 +117,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) {
                 throw new Error(`Failed to delete film ${filmId}`);
             }
+            console.log(`Film ${filmId} deleted successfully`)
         })
         .catch(error => {
             console.error('Error deleting film:', error);
         });
-    }
-
-
-
-    function updateTickets(film) {
-        fetch(`http://localhost:3000/films/${film.id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(film)
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error('Failed to update tickets');
-            }
-            return res.json();
-        })
-        .then(updatedFilmData => {
-            filmDetails(updatedFilmData.id); 
-        })
-        .catch(error => {
-            console.error('Error updating tickets:', error);
-        });
-    }
+    } 
+    deleteFilm()
     
 });
