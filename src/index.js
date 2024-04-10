@@ -1,6 +1,8 @@
 // Your code here
 
+
 document.addEventListener("DOMContentLoaded", () => {
+    console.log('DOM content loaded')
     function filmDetails(filmId) {
         fetch(`http://localhost:3000/films/${filmId}`, {
             method: 'GET',
@@ -8,7 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 'Content-Type': 'application/json',
             }
         })
-        .then((res) => res.json())
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error('Failed to fetch movie details');
+            }
+            return res.json()
+        })
         .then((movieData) => {
             const availableTickets = movieData.capacity - movieData.tickets_sold;
 
@@ -20,45 +27,75 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p><strong>Showtime:</strong> ${movieData.showtime}</p>
                     <p><strong>Available Tickets:</strong> ${availableTickets}</p>
                 </div>
-            `;
+            `
 
-            const filmItem = document.querySelector('.film.item');
-            filmItem.innerHTML = movieDetailsHTML
+            const filmDetailsContainer = document.querySelector('.film-details')
+            filmDetailsContainer.innerHTML = movieDetailsHTML
         })
         .catch(error => {
-            console.error('Error fetching movie details:', error);
+            console.error('Error fetching movie details:', error)
         });
     }
 
     function filmsList() {
-        const filmList = document.querySelector('#films');
+        const filmList = document.querySelector('#films')
         fetch('http://localhost:3000/films', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             }
         })
-        .then((res) => res.json())
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error('Failed to fetch film list');
+            }
+            return res.json()
+        })
         .then((data) => {
             data.forEach(film => {
-                const titleElement = document.createElement('li');
-                titleElement.textContent = film.title;
+                const titleElement = document.createElement('li')
+                titleElement.textContent = film.title
                 titleElement.classList.add('film')
+                titleElement.dataset.filmId = film.id
 
-                titleElement.addEventListener('click', () => {
-                    filmDetails(film.id)
+                const deleteButton = document.createElement('button')
+                deleteButton.textContent = 'Delete'
+                deleteButton.classList.add('delete-button')
+
+                deleteButton.addEventListener('click', () => {
+                    deleteFilm(film.id);
                 });
 
-                filmList.appendChild(titleElement);
+                filmList.appendChild(titleElement)
+
+                titleElement.appendChild(deleteButton)
             });
         })
         .catch(error => {
-            console.error('Error fetching film list:', error);
+            console.error('Error fetching film list:', error)
         });
     }
-    filmsList();
+    function deleteFilm(filmId) {
+        fetch(`http://localhost:3000/films/${filmId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to delete film ${filmId}`)
+            }
+            const deletedFilmElement = document.querySelector(`li[data-film-id="${filmId}"]`);
+            if (deletedFilmElement) {
+                deletedFilmElement.remove()
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting film:', error);
+        })
+    }
 
-    const buyTicketButton = document.getElementById('buy-ticket');
+    filmsList()
+
+    const buyTicketButton = document.getElementById('buy-ticket')
     buyTicketButton.addEventListener('click', () => {
         const filmId = '1'
         fetch('http://localhost:3000/tickets', {
@@ -73,12 +110,12 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to purchase ticket');
+                throw new Error('Failed to purchase ticket')
             }
-            return response.json();
+            return response.json()
         })
         .then(purchaseData => {
-            const updatedTicketsSold = purchaseData.tickets_sold + 1;
+            const updatedTicketsSold = purchaseData.tickets_sold + 1
             return fetch(`http://localhost:3000/films/${filmId}`, {
                 method: 'PATCH',
                 headers: {
@@ -91,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(updatedResponse => {
             if (!updatedResponse.ok) {
-                throw new Error('Failed to update tickets');
+                throw new Error('Failed to update tickets')
             }
             return updatedResponse.json();
         })
@@ -99,30 +136,9 @@ document.addEventListener("DOMContentLoaded", () => {
             filmDetails(filmId)
         })
         .catch(error => {
-            console.error('Error purchasing ticket:', error);
-        });
-    });
-
-document.getElementById('films').addEventListener('click', event => {
-        if (event.target.tagName === 'LI') {
-            const filmId = event.target.dataset.filmId
-            deleteFilm(filmId)
-        }
-    });
-    function deleteFilm(filmId) {
-        fetch(`http://localhost:3000/films/${filmId}`, {
-            method: 'DELETE'
+            console.error('Error purchasing ticket:', error)
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to delete film ${filmId}`);
-            }
-            console.log(`Film ${filmId} deleted successfully`)
-        })
-        .catch(error => {
-            console.error('Error deleting film:', error);
-        });
-    } 
-    deleteFilm()
+    })
     
-});
+    
+})
