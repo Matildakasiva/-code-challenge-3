@@ -1,10 +1,11 @@
 // Your code here
 
+const BASE_URL= 'https://my-json-server.typicode.com/Matildakasiva/-code-challenge-3/films'
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log('DOM content loaded')
     function filmDetails(filmId) {
-        fetch(`http://localhost:3000/films/${filmId}`, {
+        fetch(`${BASE_URL} ${filmId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -39,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function filmsList() {
         const filmList = document.querySelector('#films')
-        fetch('http://localhost:3000/films', {
+        fetch(`${BASE_URL}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -58,6 +59,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 titleElement.classList.add('film')
                 titleElement.dataset.filmId = film.id
 
+                titleElement.addEventListener('click', () => {
+                    filmDetails(film.id);
+                });
+
                 const deleteButton = document.createElement('button')
                 deleteButton.textContent = 'Delete'
                 deleteButton.classList.add('delete-button')
@@ -67,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 filmList.appendChild(titleElement)
-
                 titleElement.appendChild(deleteButton)
             });
         })
@@ -75,8 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Error fetching film list:', error)
         });
     }
+
     function deleteFilm(filmId) {
-        fetch(`http://localhost:3000/films/${filmId}`, {
+        fetch(`${BASE_URL} ${filmId}`, {
             method: 'DELETE'
         })
         .then(response => {
@@ -116,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(purchaseData => {
             const updatedTicketsSold = purchaseData.tickets_sold + 1
-            return fetch(`http://localhost:3000/films/${filmId}`, {
+            return fetch(`${BASE_URL} ${filmId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -139,6 +144,4 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('Error purchasing ticket:', error)
         })
     })
-    
-    
 })
